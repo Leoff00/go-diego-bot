@@ -17,35 +17,44 @@ type ConfigProps struct {
 const BOT_AUTH_PREFIX = "Bot "
 
 var (
-	BotId  string
-	config *ConfigProps
+	botPrefix string
+	BotId     string
+	config    *ConfigProps
 )
 
-func readConfig() (string, error) {
+func readConfig() error {
 	file, err := ioutil.ReadFile("./config.json")
 
 	if err != nil {
 		log.Default().Fatalln("Failed to read config file", err)
-		return "", err
+		return err
 	}
 
 	err = json.Unmarshal(file, &config)
 
 	if err != nil {
 		log.Default().Fatalln("Failed to unmarshal JSON struct", err)
-		return "", err
+		return err
 	}
 
-	return config.BotPrefix, nil
+	botPrefix = config.BotPrefix
+
+	return nil
 }
 
-func main() {
-	token := envs.Getenv("AUTH_TOKEN")
-	_, err := readConfig()
-
-	if err != nil {
-		fmt.Println(err)
+func messageHandler(s *discordgo.Session, m *discordgo.Message) {
+	if m.Author.ID != BotId {
+		return
 	}
+
+	if m.Content == botPrefix+"ping" {
+		fmt.Println(m.ChannelID)
+		_, _ = s.ChannelMessageSend(m.ChannelID, "pong")
+	}
+}
+
+func Start() {
+	token := envs.Getenv("AUTH_TOKEN")
 
 	goBot, err := discordgo.New(BOT_AUTH_PREFIX + token)
 
@@ -66,12 +75,20 @@ func main() {
 	err = goBot.Open()
 
 	if err != nil {
+		log.Default().Fatalln(err)
+	}
+
+	fmt.Println("Bot is running...")
+}
+
+func main() {
+	err := readConfig()
+
+	if err != nil {
 		fmt.Println(err.Error())
 	}
 
-	fmt.Println("Bot running...")
+	Start()
 
+	<-make(chan struct{})
 }
-
-// TODO: Implement message handler to send I/O and consume Session API
-func messageHandler(s *discordgo.Session, m *discordgo.Disconnect) {}
