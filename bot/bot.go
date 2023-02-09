@@ -3,12 +3,15 @@ package bot
 import (
 	"fmt"
 	"go-diego-bot/config"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
 )
 
-var BotID string
-var goBot *discordgo.Session
+var (
+	BotID string
+	goBot *discordgo.Session
+)
 
 func Start() {
 	goBot, err := discordgo.New("Bot " + config.Token)
@@ -26,7 +29,10 @@ func Start() {
 
 	BotID = u.ID
 
-	goBot.AddHandler(messageHandler)
+	goBot.AddHandler(message)
+	goBot.AddHandler(helpJava)
+
+	goBot.Identify.Intents = discordgo.IntentGuildMessages
 
 	err = goBot.Open()
 
@@ -37,12 +43,30 @@ func Start() {
 	fmt.Println("Bot is running!")
 }
 
-func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
+func message(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == BotID {
 		return
 	}
 
-	if m.Content == "ping" {
+	if m.Content == config.BotPrefix+"ping" {
 		_, _ = s.ChannelMessageSend(m.ChannelID, "pong")
+	}
+	if m.Content == config.BotPrefix+"pong" {
+		_, _ = s.ChannelMessageSend(m.ChannelID, "ping")
+	}
+}
+
+func helpJava(s *discordgo.Session, m *discordgo.MessageCreate) {
+	if m.Author.ID == BotID {
+		return
+	}
+
+	str := fmt.Sprintf(
+		"Opa %s, uma bomba java? 💣, esses caras podem te ajudar 👇 \n", m.Author.Mention(),
+	)
+
+	if strings.Contains(m.Content, config.BotPrefix+"java") == true {
+		_, _ = s.ChannelMessageSend(m.ChannelID, str)
+		_, _ = s.ChannelMessageSend(m.ChannelID, "<@241680344791646209>")
 	}
 }
