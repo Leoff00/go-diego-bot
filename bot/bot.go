@@ -62,11 +62,10 @@ func helpJava(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	str := fmt.Sprintf(
-		"Opa %s, uma bomba java? 💣, esses caras podem te ajudar 👇 \n", m.Author.Mention(),
+		"Opa %s, uma bomba java? 💣, esses caras podem te ajudar 👇 \n %s", m.Author.Mention(), "<@241680344791646209>",
 	)
 
 	if strings.Contains(m.Content, config.BotPrefix+"java") == true {
 		_, _ = s.ChannelMessageSend(m.ChannelID, str)
-		_, _ = s.ChannelMessageSend(m.ChannelID, "<@241680344791646209>")
 	}
 }
