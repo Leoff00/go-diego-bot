@@ -2,9 +2,8 @@ package bot
 
 import (
 	"fmt"
-	"go-diego-bot/config"
-	"go-diego-bot/handlers"
 
+	"github.com/Leoff00/go-diego-bot/config"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -12,21 +11,6 @@ var (
 	BotID string
 	goBot *discordgo.Session
 )
-
-type HandlersProps struct {
-	msgPingPongHanlder func(s *discordgo.Session, m *discordgo.MessageCreate)
-	helpJavaHandler    func(s *discordgo.Session, m *discordgo.MessageCreate)
-	msgGreeting        func(s *discordgo.Session, m *discordgo.MessageCreate)
-}
-
-func HandlerInitializer() *HandlersProps {
-	handler := HandlersProps{
-		msgPingPongHanlder: handlers.MessagePingPong(BotID),
-		helpJavaHandler:    handlers.HelpJava(BotID),
-		msgGreeting:        handlers.GreetingMessage(BotID),
-	}
-	return &handler
-}
 
 func Start() {
 	goBot, err := discordgo.New("Bot " + config.Token)
@@ -47,8 +31,12 @@ func Start() {
 	goBot.AddHandler(HandlerInitializer().msgPingPongHanlder)
 	goBot.AddHandler(HandlerInitializer().helpJavaHandler)
 	goBot.AddHandler(HandlerInitializer().msgGreeting)
+	goBot.AddHandler(HandlerInitializer().notifyNewMember)
 
-	goBot.Identify.Intents = discordgo.IntentGuildMessages
+	goBot.Identify.Intents = discordgo.IntentsGuilds |
+		discordgo.IntentMessageContent |
+		discordgo.IntentsGuildMessages |
+		discordgo.IntentsGuilds
 
 	err = goBot.Open()
 

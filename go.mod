@@ -1,4 +1,4 @@
-module go-diego-bot
+module github.com/Leoff00/go-diego-bot
 
 go 1.19
 

@@ -2,11 +2,11 @@ package handlers
 
 import (
 	"fmt"
-	"go-diego-bot/config"
 	"math/rand"
 	"strings"
 	"time"
 
+	"github.com/Leoff00/go-diego-bot/config"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -68,6 +68,20 @@ func GreetingMessage(BotID string) func(s *discordgo.Session, m *discordgo.Messa
 		}
 		if m.Content == "Oi diego" {
 			_, _ = s.ChannelMessageSend(m.ChannelID, randPhrase(m.Author.Username))
+		}
+	}
+}
+
+func NotifyNewMember(BotID string) func(s *discordgo.Session, m *discordgo.MessageCreate, g *discordgo.GuildMemberAdd) {
+	return func(s *discordgo.Session, m *discordgo.MessageCreate, g *discordgo.GuildMemberAdd) {
+		if m.Author.ID == BotID {
+			return
+		}
+
+		now := time.Now().UTC().Local()
+
+		if g.Member.JoinedAt.UTC().Local() == now {
+			_, _ = s.ChannelMessageSend(m.ChannelID, "Bem vindo"+m.Author.Username)
 		}
 	}
 }
