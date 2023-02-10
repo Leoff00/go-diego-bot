@@ -66,10 +66,8 @@ func GreetingMessage(BotID string) func(s *discordgo.Session, m *discordgo.Messa
 		if m.Author.ID == BotID {
 			return
 		}
-
 		if m.Content == "Oi diego" {
-			//TODO: randPhrase should receives member id
-			_, _ = s.ChannelMessageSend(m.ChannelID, randPhrase("testing"))
+			_, _ = s.ChannelMessageSend(m.ChannelID, randPhrase(m.Author.Username))
 		}
 	}
 }
