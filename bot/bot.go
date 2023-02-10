@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Leoff00/go-diego-bot/config"
+	"github.com/Leoff00/go-diego-bot/handlers"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -28,10 +29,12 @@ func Start() {
 
 	BotID = u.ID
 
-	goBot.AddHandler(HandlerInitializer().msgPingPongHanlder)
-	goBot.AddHandler(HandlerInitializer().helpJavaHandler)
-	goBot.AddHandler(HandlerInitializer().msgGreeting)
-	goBot.AddHandler(HandlerInitializer().notifyNewMember)
+	handler := handlers.HandlersProps{}
+
+	goBot.AddHandler(handler.MessagePingPong())
+	goBot.AddHandler(handler.HelpJava())
+	goBot.AddHandler(handler.Greeting())
+	goBot.AddHandler(handler.MessagePingPong())
 
 	goBot.Identify.Intents = discordgo.IntentsGuilds |
 		discordgo.IntentMessageContent |

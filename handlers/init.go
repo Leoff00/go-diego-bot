@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"fmt"
-	"math/rand"
 	"strings"
 	"time"
 
@@ -15,22 +14,9 @@ var (
 	arr []string
 )
 
-func randPhrase(user string) string {
-
-	rand.Seed(time.Now().Unix())
-
-	g1 := fmt.Sprintf("Ola %s!", user)
-	g2 := fmt.Sprintf("Iaee %s!", user)
-	g3 := fmt.Sprintf("Oiee %s!", user)
-
-	arr = append(arr, g1, g2, g3)
-	return arr[rand.Intn(len(arr))]
-
-}
-
-func MessagePingPong(BotID string) func(s *discordgo.Session, m *discordgo.MessageCreate) {
+func (h *HandlersProps) MessagePingPong() func(s *discordgo.Session, m *discordgo.MessageCreate) {
 	return func(s *discordgo.Session, m *discordgo.MessageCreate) {
-		if m.Author.ID == BotID {
+		if m.Author.ID == s.State.User.ID {
 			return
 		}
 
@@ -43,13 +29,14 @@ func MessagePingPong(BotID string) func(s *discordgo.Session, m *discordgo.Messa
 	}
 }
 
-func HelpJava(BotID string) func(s *discordgo.Session, m *discordgo.MessageCreate) {
+func (h *HandlersProps) HelpJava() func(s *discordgo.Session, m *discordgo.MessageCreate) {
 	return func(s *discordgo.Session, m *discordgo.MessageCreate) {
-		if m.Author.ID == BotID {
+		if m.Author.ID == s.State.User.ID {
 			return
 		}
 		str = fmt.Sprintf(
-			"Opa %s, uma bomba java 💣? E sses caras podem te ajudar 👇 \n %s \n %s \n %s", m.Author.Mention(),
+			"Opa %s, uma bomba java 💣? Esses caras podem te ajudar 👇 \n %s \n %s \n %s",
+			m.Author.Mention(),
 			"<@241680344791646209>",
 			"<@430150392068702229>",
 			"<@958819349580349490>",
@@ -61,27 +48,24 @@ func HelpJava(BotID string) func(s *discordgo.Session, m *discordgo.MessageCreat
 	}
 }
 
-func GreetingMessage(BotID string) func(s *discordgo.Session, m *discordgo.MessageCreate) {
+func (h *HandlersProps) Greeting() func(s *discordgo.Session, m *discordgo.MessageCreate) {
 	return func(s *discordgo.Session, m *discordgo.MessageCreate) {
-		if m.Author.ID == BotID {
+		if m.Author.ID == s.State.User.ID {
 			return
 		}
 		if m.Content == "Oi diego" {
-			_, _ = s.ChannelMessageSend(m.ChannelID, randPhrase(m.Author.Username))
+			_, _ = s.ChannelMessageSend(m.ChannelID, RandPhrase(m.Author.Username))
 		}
 	}
 }
 
-func NotifyNewMember(BotID string) func(s *discordgo.Session, m *discordgo.MessageCreate, g *discordgo.GuildMemberAdd) {
-	return func(s *discordgo.Session, m *discordgo.MessageCreate, g *discordgo.GuildMemberAdd) {
-		if m.Author.ID == BotID {
-			return
-		}
+func (h *HandlersProps) NotifyNewMember() func(s *discordgo.Session, g *discordgo.GuildMemberAdd) {
+	return func(s *discordgo.Session, g *discordgo.GuildMemberAdd) {
 
 		now := time.Now().UTC().Local()
 
 		if g.Member.JoinedAt.UTC().Local() == now {
-			_, _ = s.ChannelMessageSend(m.ChannelID, "Bem vindo"+m.Author.Username)
+			_, _ = s.ChannelMessageSend(s.State.SessionID, "Bem vindo")
 		}
 	}
 }

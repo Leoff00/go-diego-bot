@@ -3,8 +3,9 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"go-diego-bot/envs"
 	"os"
+
+	"github.com/Leoff00/go-diego-bot/envs"
 )
 
 var (
