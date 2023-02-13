@@ -2,6 +2,9 @@ package bot
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/Leoff00/go-diego-bot/config"
 	"github.com/Leoff00/go-diego-bot/handlers"
@@ -34,18 +37,23 @@ func Start() {
 	goBot.AddHandler(handler.MessagePingPong())
 	goBot.AddHandler(handler.HelpJava())
 	goBot.AddHandler(handler.Greeting())
-	goBot.AddHandler(handler.MessagePingPong())
+	goBot.AddHandler(handler.Img())
+	goBot.AddHandler(handler.NotifyNewMember())
 
-	goBot.Identify.Intents = discordgo.IntentsGuilds |
-		discordgo.IntentMessageContent |
-		discordgo.IntentsGuildMessages |
-		discordgo.IntentsGuilds
+	goBot.Identify.Intents = discordgo.IntentsAllWithoutPrivileged
 
 	err = goBot.Open()
+	defer goBot.Close()
 
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
 	fmt.Println("Bot is running!")
+
+	fmt.Println("Press Ctrl + C to exit.")
+	stsignal := make(chan os.Signal, 1)
+	signal.Notify(stsignal, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
+
+	<-stsignal
 }
