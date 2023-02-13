@@ -1,12 +1,14 @@
 package handlers
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
-	"os"
+	"strings"
 	"time"
 
 	"github.com/Leoff00/go-diego-bot/envs"
@@ -22,40 +24,27 @@ func RandPhrase(user string) string {
 	return arr[rand.Intn(len(arr))]
 }
 
-func ReadImg() *os.File {
-	var err error
+func PictureGenerator(param string, resC chan *AiResponse, errC chan error) (chan *AiResponse, chan error) {
 
-	file, err := os.Open("./img.jpg")
+	rand.Seed(time.Now().Unix())
+	letters := "nature city technology food still_life abstract wildlife monkey"
 
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return file
-
-}
-
-func PictureGenerator(param string) (*http.Response, error) {
-	letters := []string{
-		"nature", "city", "technology", "food", "still_life", "abstract", "wildlife",
-	}
-
-	for i, _ := range letters {
-		if param != letters[i] {
-			return nil, errors.New("Cannot choose a different param, please choose this params \n" + letters[i])
-		}
+	if strings.Contains(letters, param) == true {
+	} else {
+		errStr := errors.New("Cannot choose a different param, please choose this params \n" + letters)
+		errC <- errStr
+		return nil, errC
 	}
 
 	c := &http.Client{}
 
-	req, err := http.NewRequest(
-		"GET",
-		"https://api.api-ninjas.com/v1/randomimage?category="+param,
-		nil)
+	api_url := fmt.Sprintf("https://api.pexels.com/v1/search?query=%s&page=%d&per_page=1", param, rand.Intn(50))
+	req, err := http.NewRequest("GET", api_url, nil)
 
-	key := envs.Getenv("API_KEY")
-	req.Header.Add("x-api-key", key)
-	req.Header.Add("Accept", "image/jpeg")
+	key_ia := envs.Getenv("API_KEY_IA")
+
+	req.Header.Add("Authorization", key_ia)
+	req.Header.Add("X-Ratelimit-Limit", "10000")
 
 	if err != nil {
 		log.Default().Fatalln(err)
@@ -64,8 +53,26 @@ func PictureGenerator(param string) (*http.Response, error) {
 	res, err := c.Do(req)
 
 	if err != nil {
+		log.Default().Fatalln("Error during the request...", err)
+	}
+
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+
+	if err != nil {
+		log.Default().Fatalln("Error while reading the response, response may be nil", err)
+	}
+
+	var responseAI AiResponse
+
+	err = json.Unmarshal(body, &responseAI)
+
+	if err != nil {
 		log.Default().Fatalln(err)
 	}
 
-	return res, nil
+	resC <- &responseAI
+
+	return resC, nil
 }

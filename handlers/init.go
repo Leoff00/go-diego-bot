@@ -7,7 +7,6 @@ import (
 
 	"github.com/Leoff00/go-diego-bot/config"
 	"github.com/bwmarrin/discordgo"
-	"github.com/google/uuid"
 )
 
 var (
@@ -36,17 +35,29 @@ func (h *HandlersProps) Img() func(s *discordgo.Session, m *discordgo.MessageCre
 			return
 		}
 
-		res, err := PictureGenerator("nature")
+		responseAi := make(chan *AiResponse)
+		errC := make(chan error)
 
-		if m.Content == config.BotPrefix+"picture" {
+		param := strings.Split(m.Content, " ")
+		data := param[1]
 
-			if err == nil {
-				_, _ = s.ChannelFileSend(m.ChannelID, uuid.NewString()+".jpg", res.Body)
+		go PictureGenerator(data, responseAi, errC)
+
+		select {
+		case res := <-responseAi:
+			var ogSize string
+
+			for _, p := range res.Photos {
+				ogSize = p.Src.Original
 			}
 
+			if m.Content == config.BotPrefix+"picture "+data {
+				_, _ = s.ChannelMessageSend(m.ChannelID, ogSize)
+			}
+
+		case err := <-errC:
 			if err != nil {
 				_, _ = s.ChannelMessageSend(m.ChannelID, err.Error())
-
 			}
 		}
 	}
