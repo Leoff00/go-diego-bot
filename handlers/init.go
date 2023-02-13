@@ -36,10 +36,18 @@ func (h *HandlersProps) Img() func(s *discordgo.Session, m *discordgo.MessageCre
 			return
 		}
 
+		res, err := PictureGenerator("nature")
+
 		if m.Content == config.BotPrefix+"picture" {
-			img := ReadImg()
-			_, _ = s.ChannelFileSend(m.ChannelID, uuid.NewString()+".jpg", img)
-			defer img.Close()
+
+			if err == nil {
+				_, _ = s.ChannelFileSend(m.ChannelID, uuid.NewString()+".jpg", res.Body)
+			}
+
+			if err != nil {
+				_, _ = s.ChannelMessageSend(m.ChannelID, err.Error())
+
+			}
 		}
 	}
 }
