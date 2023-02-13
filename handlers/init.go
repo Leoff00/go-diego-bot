@@ -7,6 +7,7 @@ import (
 
 	"github.com/Leoff00/go-diego-bot/config"
 	"github.com/bwmarrin/discordgo"
+	"github.com/google/uuid"
 )
 
 var (
@@ -29,17 +30,31 @@ func (h *HandlersProps) MessagePingPong() func(s *discordgo.Session, m *discordg
 	}
 }
 
+func (h *HandlersProps) Img() func(s *discordgo.Session, m *discordgo.MessageCreate) {
+	return func(s *discordgo.Session, m *discordgo.MessageCreate) {
+		if m.Author.ID == s.State.User.ID {
+			return
+		}
+
+		if m.Content == config.BotPrefix+"picture" {
+			img := ReadImg()
+			_, _ = s.ChannelFileSend(m.ChannelID, uuid.NewString()+".jpg", img)
+			defer img.Close()
+		}
+	}
+}
+
 func (h *HandlersProps) HelpJava() func(s *discordgo.Session, m *discordgo.MessageCreate) {
 	return func(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if m.Author.ID == s.State.User.ID {
 			return
 		}
 		str = fmt.Sprintf(
-			"Opa %s, uma bomba java 💣? Esses caras podem te ajudar 👇 \n %s \n %s \n %s",
+			"Opa %s, uma bomba JS 💣? Esses caras podem te ajudar 👇 \n %s \n %s \n %s",
 			m.Author.Mention(),
-			"<@241680344791646209>",
-			"<@430150392068702229>",
-			"<@958819349580349490>",
+			"<@209655533500628992>",
+			"<@847935543018782772>",
+			"<@599980091136671754>",
 		)
 
 		if strings.Contains(m.Content, config.BotPrefix+"java") == true {
@@ -64,8 +79,8 @@ func (h *HandlersProps) NotifyNewMember() func(s *discordgo.Session, g *discordg
 
 		now := time.Now().UTC().Local()
 
-		if g.Member.JoinedAt.UTC().Local() == now {
-			_, _ = s.ChannelMessageSend(s.State.SessionID, "Bem vindo")
+		if g.Member.JoinedAt == now {
+			_, _ = s.ChannelMessageSend(s.State.User.ID, "Bem vindo"+s.State.User.Username)
 		}
 	}
 }
