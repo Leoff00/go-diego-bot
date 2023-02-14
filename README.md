@@ -77,5 +77,5 @@ MIT
 
 ## Others
 
-<h3>Read the <a href="">CHANGELOG.MD</a></h3>
+<h3>Read the <a href="https://github.com/Leoff00/go-diego-bot/blob/main/CHANGELOG.MD">CHANGELOG.MD</a></h3>
 
