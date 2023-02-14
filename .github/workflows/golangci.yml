@@ -12,7 +12,7 @@ jobs:
     
     - name: view the secrets context
       shell: bash
-      run: echo "$SECRETS_CONTEXT"
+      run: echo "$SECRETS_CONTEXT___"
       env:
         SECRETS_CONTEXT: ${{ toJson(DOCKERHUB) }}
     
