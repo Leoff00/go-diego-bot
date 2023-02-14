@@ -14,18 +14,13 @@ jobs:
       uses: actions/setup-go@v3
       with:
         go-version: 1.20
-    
+        
     - name: Login to Docker Hub
       uses: docker/login-action@v2
       with:
           username: ${{ secrets.DOCKERHUB_LOGIN }}
           password: ${{ secrets.DOCKERHUB_PWD }}
-      env:
-          LOGIN: ${{ secrets.DOCKERHUB_LOGIN }}
-          PWD: ${{ secrets.DOCKERHUB_PWD }}
-          run: |
-            docker login -u $LOGIN -p $PWD
-    
+          
     - name: Building Docker Image
       env: 
           IMAGE_TAG: latest
