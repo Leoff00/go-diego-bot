@@ -15,9 +15,14 @@ jobs:
       with:
         go-version: 1.20
 
-    - name: Setting up Docker Push
+    - name: Building Docker Image 
       env: 
           IMAGE_TAG: latest
       run: 
-           docker image build -t leoff00/diego_bot:$IMAGE_TAG . 
-           docker push leoff00/diego_bot:$IMAGE_TAG
+         docker image build -t leoff00/diego_bot:$IMAGE_TAG . 
+           
+    - name: Pushing Docker Image
+      env: 
+          IMAGE_TAG: latest
+      run: 
+          docker push leoff00/diego_bot:$IMAGE_TAG
