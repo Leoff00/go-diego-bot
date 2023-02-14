@@ -2,13 +2,11 @@ package handlers
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/Leoff00/go-diego-bot/envs"
@@ -27,18 +25,18 @@ func RandPhrase(user string) string {
 func PictureGenerator(param string, resC chan *AiResponse, errC chan error) (chan *AiResponse, chan error) {
 
 	rand.Seed(time.Now().Unix())
-	letters := "nature city technology food still_life abstract wildlife monkey"
+	// letters := "abcdefghijklmnopqrstuvwxyz"
 
-	if strings.Contains(letters, param) == true {
-	} else {
-		errStr := errors.New("Cannot choose a different param, please choose this params \n" + letters)
-		errC <- errStr
-		return nil, errC
-	}
+	// if strings.Contains(letters, param) == true {
+	// } else {
+	// 	errStr := errors.New("Cannot choose a different param, please choose this params \n" + letters)
+	// 	errC <- errStr
+	// 	return nil, errC
+	// }
 
 	c := &http.Client{}
 
-	api_url := fmt.Sprintf("https://api.pexels.com/v1/search?query=%s&page=%d&per_page=1", param, rand.Intn(50))
+	api_url := fmt.Sprintf("https://api.pexels.com/v1/search?query=%s&page=%d&per_page=1", param, rand.Intn(100))
 	req, err := http.NewRequest("GET", api_url, nil)
 
 	key_ia := envs.Getenv("API_KEY_IA")

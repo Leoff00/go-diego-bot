@@ -52,7 +52,7 @@ func (h *HandlersProps) Img() func(s *discordgo.Session, m *discordgo.MessageCre
 			}
 
 			if m.Content == config.BotPrefix+"picture "+data {
-				_, _ = s.ChannelMessageSend(m.ChannelID, ogSize)
+				_, _ = s.ChannelMessageSend(m.ChannelID, "Aqui esta o que você pediu! \n"+ogSize)
 			}
 
 		case err := <-errC:
