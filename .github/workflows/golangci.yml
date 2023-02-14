@@ -19,7 +19,7 @@ jobs:
       uses: docker/login-action@v2
       with:
           username: ${{ secrets.DOCKERHUB_LOGIN }}
-          password: ${{ secrets.DOCKERHUB_PWD }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
           
     - name: Building Docker Image
       env: 
