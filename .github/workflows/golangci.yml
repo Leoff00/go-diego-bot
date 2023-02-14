@@ -10,19 +10,11 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: view the secrets context
-      shell: bash
-      run: echo "$SECRETS_CONTEXT___"
-      env:
-        SECRETS_CONTEXT: ${{ toJson(secrets.DOCKERHUB) }}
-    
     - name: Login to Docker Hub
-      uses: docker/login-action@v2.1.0
-      env:
-        LOGIN: ${{ secrets.DOCKERHUB_USERNAME }}
-        PWD: ${{ secrets.DOCKERHUB_PWD }}
-        run: |
-          docker login -u $LOGIN -p $PWD
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
     
     - name: Setting up golang 
       uses: actions/setup-go@v3
