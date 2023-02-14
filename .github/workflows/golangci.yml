@@ -9,26 +9,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-
+    
     - name: Setting up golang 
       uses: actions/setup-go@v3
       with:
         go-version: 1.20
         
     - name: Login to Docker Hub
-      uses: docker/login-action@v2
+      uses: docker/login-action@v2.1.0
       with:
           username: ${{ secrets.DOCKERHUB_LOGIN }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           
-    - name: Building Docker Image
+    - name: Build and Push docker image
       env: 
           IMAGE_TAG: latest
-      run: 
+      run: |
          DOCKER_BUILDKIT=1 docker image build -t leoff00/diego_bot:$IMAGE_TAG . 
-           
-    - name: Pushing Docker Image
-      env: 
-          IMAGE_TAG: latest
-      run: 
-          docker push leoff00/diego_bot:$IMAGE_TAG
+         docker push leoff00/diego_bot:$IMAGE_TAG
