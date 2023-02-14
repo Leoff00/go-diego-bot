@@ -28,6 +28,8 @@
   - if you type a phrase that have java in the string, the bot will tag the some members (i add example member ID) in the server to help you. (CUSTOMIZABLE)
 * Greeting
   - The bot will greeting you if you send "!Oi diego" to him.
+* Image generator
+  - Diego bot responses with an image if you send "!picture (your substantive).
 
 ## How To Use
 
@@ -75,5 +77,5 @@ MIT
 
 ## Others
 
-<h3>Read the <a href="">CHANGELOGS.MD</a></h3>
+<h3>Read the <a href="">CHANGELOG.MD</a></h3>
 
