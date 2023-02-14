@@ -19,7 +19,7 @@ jobs:
       env: 
           IMAGE_TAG: latest
       run: 
-         docker image build -t leoff00/diego_bot:$IMAGE_TAG . 
+         DOCKER_BUILDKIT=1 docker image build -t leoff00/diego_bot:$IMAGE_TAG . 
            
     - name: Pushing Docker Image
       env: 
