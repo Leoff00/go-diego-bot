@@ -4,8 +4,8 @@ services:
     image: leoff00/diegobot:latest
     restart: on-failure
     environment:
-      - AUTH_TOKEN=${AUTH_TOKEN}
-      - API_KEY_IA=${API_KEY_IA}
+      AUTH_TOKEN: ${AUTH_TOKEN}
+      API_KEY_IA: ${API_KEY_IA}
     networks:
       - diego_network
     ports:
