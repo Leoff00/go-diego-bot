@@ -24,5 +24,6 @@ jobs:
           
     - name: Build and Push docker image
       run: |
-         docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/diego_bot:latest . 
-         docker push ${{ secrets.DOCKERHUB_USERNAME }}/diego_bot:latest
+         docker image build -t ${{ secrets.DOCKERHUB_USERNAME }}/diegobot . 
+         docker tag ${{ secrets.DOCKERHUB_USERNAME }}/diegobot ${{ secrets.DOCKERHUB_USERNAME }}/diegobot:latest
+         docker push ${{ secrets.DOCKERHUB_USERNAME }}/diegobot:latest
