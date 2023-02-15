@@ -1,9 +1,8 @@
 version: "3.9"
 services:
   godiego:
-    image: go_diego_bot_v1:latest
-    container_name: go_diego_v1
+    image: leoff00/diego_bot:latest
+    container_name: diego_bot
     restart: on-failure
-    env_file: .env
     ports:
       - 4000:4000
