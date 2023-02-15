@@ -27,5 +27,5 @@ jobs:
           IMAGE_TAG: latest
       run: |
          docker image build -t ${{ secrets.DOCKERHUB_USERNAME }}/diego_bot:$IMAGE_TAG . 
-         docker image tag diego_bot ${{ secrets.DOCKERHUB_USERNAME }}/diego_bot:$IMAGE_TAG
+         docker image tag ${{ secrets.DOCKERHUB_USERNAME }}/diego_bot ${{ secrets.DOCKERHUB_USERNAME }}/diego_bot:$IMAGE_TAG
          docker push ${{ secrets.DOCKERHUB_USERNAME }}/diego_bot:$IMAGE_TAG
