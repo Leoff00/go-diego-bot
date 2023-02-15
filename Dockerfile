@@ -7,7 +7,6 @@ RUN apk update && apk add --no-cache bash
 WORKDIR /go/app
 
 COPY . /go/app/
-COPY ./.env /go/app/
 
 RUN go mod download && go mod tidy
 
