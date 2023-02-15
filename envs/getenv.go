@@ -8,7 +8,7 @@ import (
 
 func Getenv(envFile string) string {
 
-	viper.SetConfigFile(".env")
+	viper.SetConfigFile("./.env")
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.Default().Fatalln("Could not load environment variables", err)
