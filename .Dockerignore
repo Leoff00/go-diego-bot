@@ -1,3 +1,6 @@
-.github
 .git
-.gitignore
+.vscode
+.idea
+*.log
+
+/go/pkg/

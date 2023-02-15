@@ -1,0 +1,17 @@
+version: "3.9"
+services:
+  godiego:
+    image: leoff00/diego_bot:latest
+    container_name: diego_bot
+    restart: on-failure
+    networks:
+      - diego_network
+    environment:
+      - AUTH_TOKEN=${AUTH_TOKEN}
+      - API_KEY_IA=${API_KEY_IA}
+    ports:
+      - 4000:4000
+
+networks:
+  diego_network:
+    driver: bridge

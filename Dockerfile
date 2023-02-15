@@ -1,18 +1,17 @@
 FROM golang:1.20.0-alpine
 
-WORKDIR /app/go
+LABEL maintainer="leoff00"
 
-COPY go.mod /app/go/
-COPY go.sum /app/go/
+RUN apk update && apk add --no-cache bash
 
-RUN go mod download
-RUN go mod tidy
+WORKDIR /go/app
 
-COPY --chmod=765 . /app/go/
-RUN chmod +x /app/go/
+COPY . /go/app/
+
+RUN go mod download && go mod tidy
 
 EXPOSE 4000
 
-RUN ./build.sh
+RUN go build -o diegobot
 
-CMD ["./bin/go-diego-bot-linux"]
+CMD ["./diegobot"]
