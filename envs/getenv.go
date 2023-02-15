@@ -2,15 +2,17 @@ package envs
 
 import (
 	"log"
-	"os"
 
-	"github.com/joho/godotenv"
+	"github.com/spf13/viper"
 )
 
 func Getenv(envFile string) string {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalln("Cannot read your environment variable", err)
+
+	viper.SetConfigFile(".env")
+
+	if err := viper.ReadInConfig(); err != nil {
+		log.Default().Fatalln("Could not load environment variables", err)
 	}
-	return os.Getenv(envFile)
+
+	return viper.GetString(envFile)
 }
