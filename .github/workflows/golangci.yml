@@ -23,8 +23,6 @@ jobs:
         go-version: 1.20
           
     - name: Build and Push docker image
-      env: 
-          IMAGE_TAG: latest
       run: |
-         docker image build -t ${{ secrets.DOCKERHUB_USERNAME }}/diego_bot:$IMAGE_TAG . 
-         docker push ${{ secrets.DOCKERHUB_USERNAME }}/diego_bot:$IMAGE_TAG
+         docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/diego_bot:latest . 
+         docker push ${{ secrets.DOCKERHUB_USERNAME }}/diego_bot:latest
