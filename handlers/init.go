@@ -3,15 +3,17 @@ package handlers
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/Leoff00/go-diego-bot/config"
 	"github.com/bwmarrin/discordgo"
 )
 
 var (
-	str string
-	arr []string
+	str        string
+	arr        []string
+	huf        *HandlerUtilFunctions
+	responseAi = make(chan *AiResponse)
+	errC       = make(chan error)
 )
 
 func (h *HandlersProps) MessagePingPong() func(s *discordgo.Session, m *discordgo.MessageCreate) {
@@ -35,29 +37,24 @@ func (h *HandlersProps) Img() func(s *discordgo.Session, m *discordgo.MessageCre
 			return
 		}
 
-		responseAi := make(chan *AiResponse)
-		errC := make(chan error)
+		if m.Content != "" && strings.HasPrefix(m.Content, config.BotPrefix+"picture") {
+			data := huf.ParamSeparator(m.Content)
 
-		param := strings.Split(m.Content, " ")
-		data := param[1]
+			go huf.PicGenerator(data, responseAi, errC)
 
-		go PictureGenerator(data, responseAi, errC)
+			select {
+			case res := <-responseAi:
+				var ogSize string
 
-		select {
-		case res := <-responseAi:
-			var ogSize string
-
-			for _, p := range res.Photos {
-				ogSize = p.Src.Original
-			}
-
-			if m.Content == config.BotPrefix+"picture "+data {
+				for _, p := range res.Photos {
+					ogSize = p.Src.Original
+				}
 				_, _ = s.ChannelMessageSend(m.ChannelID, "Aqui esta o que você pediu! \n"+ogSize)
-			}
 
-		case err := <-errC:
-			if err != nil {
-				_, _ = s.ChannelMessageSend(m.ChannelID, err.Error())
+			case err := <-errC:
+				if err != nil {
+					_, _ = s.ChannelMessageSend(m.ChannelID, err.Error())
+				}
 			}
 		}
 	}
@@ -87,19 +84,28 @@ func (h *HandlersProps) Greeting() func(s *discordgo.Session, m *discordgo.Messa
 		if m.Author.ID == s.State.User.ID {
 			return
 		}
-		if m.Content == "Oi diego" {
-			_, _ = s.ChannelMessageSend(m.ChannelID, RandPhrase(m.Author.Username))
+		if m.Content == "oi diego" {
+			_, _ = s.ChannelMessageSend(m.ChannelID, huf.RandPh(m.Author.Username))
 		}
 	}
 }
 
-func (h *HandlersProps) NotifyNewMember() func(s *discordgo.Session, g *discordgo.GuildMemberAdd) {
-	return func(s *discordgo.Session, g *discordgo.GuildMemberAdd) {
+func (h *HandlersProps) MsgHelpCmd() func(s *discordgo.Session, m *discordgo.MessageCreate) {
+	return func(s *discordgo.Session, m *discordgo.MessageCreate) {
+		if m.Author.ID == s.State.User.ID {
+			return
+		}
 
-		now := time.Now().UTC().Local()
+		helpStr := fmt.Sprintf(`
+>Iaee %s meu nome é Die**go**, bot em go feito pra te ajudar com algumas 
+utilidades no server esses são os comandos pelo qual eu respondo:
+**oi diego -> responderei você de volta!**
+**!picture [parametros] -> gerarei pra você uma imagem com o dado que você me forneceu!**
+**!java [mensagem] -> marcarei 3 pessoas que manjam de java no server para te ajudar!**
+**!ping ou !pong -> jogarei um ping pong com você :)!** `, m.Author.Username)
 
-		if g.Member.JoinedAt == now {
-			_, _ = s.ChannelMessageSend(s.State.User.ID, "Bem vindo"+s.State.User.Username)
+		if m.Content == config.BotPrefix+"help" {
+			_, _ = s.ChannelMessageSend(m.ChannelID, helpStr)
 		}
 	}
 }

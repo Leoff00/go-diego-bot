@@ -38,6 +38,7 @@ func Start() {
 	goBot.AddHandler(handler.HelpJava())
 	goBot.AddHandler(handler.Greeting())
 	goBot.AddHandler(handler.Img())
+	goBot.AddHandler(handler.MsgHelpCmd())
 
 	goBot.Identify.Intents = discordgo.IntentsAllWithoutPrivileged
 
