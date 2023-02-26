@@ -30,3 +30,6 @@ jobs:
     
     - name: Render GitHub Action - DEPLOYING...
       uses: Bounceapp/render-action@0.6.0
+      with:
+          render-token: ${{ secrets.RENDER_API_KEY }}
+          service-id: ${{secrets.SERVICE_ID_RENDER}}
