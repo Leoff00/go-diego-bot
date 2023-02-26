@@ -34,4 +34,3 @@ jobs:
           github-token: ${{ secrets.GH_TOKEN }}
           render-token: ${{ secrets.RENDER_API_KEY }}
           service-id: ${{ secrets.SERVICE_ID_RENDER }}
-          retries: 5
