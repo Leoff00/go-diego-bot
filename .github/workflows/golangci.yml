@@ -31,6 +31,5 @@ jobs:
     - name: Render GitHub Action - DEPLOYING...
       uses: Bounceapp/render-action@0.6.0
       with:
-          email: leof0180@gmail.com
-          token: ${{ secrets.GH_TOKEN }}
-          service-id: ${{secrets.SERVICE_ID_RENDER}}
+          render-token: ${{ secrets.GH_TOKEN }}
+          service-id: ${{ secrets.SERVICE_ID_RENDER }}
