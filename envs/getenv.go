@@ -1,7 +1,7 @@
 package envs
 
 import (
-	"log"
+	"os"
 
 	"github.com/spf13/viper"
 )
@@ -11,7 +11,7 @@ func Getenv(envFile string) string {
 	viper.SetConfigFile("./.env")
 
 	if err := viper.ReadInConfig(); err != nil {
-		log.Default().Fatalln("Could not load environment variables", err)
+		return os.Getenv(envFile)
 	}
 
 	return viper.GetString(envFile)
