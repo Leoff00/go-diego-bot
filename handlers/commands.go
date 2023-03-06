@@ -27,6 +27,8 @@ utilidades no server esses são os comandos pelo qual eu respondo: `
 	**!picture [parametros] -> gerarei pra você uma imagem com o dado que você me forneceu!**
 	**!java [mensagem] -> marcarei 3 pessoas que manjam de java no server para te ajudar!**
 	**!ping ou !pong -> jogarei um ping pong com você :)!**
+	**!clear [quantidade] (limite de 100) para excluir as mensagens do chat.** 
 	**/people para mostrar quantas pessoas temos no servidor!** 
-	**/avatar para mostrar sua foto, contendo tambem a url dela.** `
+	**/avatar para mostrar sua foto, contendo tambem a url dela.** 
+	`
 )
