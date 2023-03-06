@@ -97,7 +97,7 @@ func (h *HandlersProps) MsgHelpCmd() func(s *discordgo.Session, m *discordgo.Mes
 		}
 
 		helpStr := fmt.Sprintf(`
->Iaee %s meu nome é Die**go**, bot em go feito pra te ajudar com algumas 
+Iaee %s meu nome é Die**go**, bot em go feito pra te ajudar com algumas 
 utilidades no server esses são os comandos pelo qual eu respondo:
 **oi diego -> responderei você de volta!**
 **!picture [parametros] -> gerarei pra você uma imagem com o dado que você me forneceu!**
@@ -106,6 +106,23 @@ utilidades no server esses são os comandos pelo qual eu respondo:
 
 		if m.Content == config.BotPrefix+"help" {
 			_, _ = s.ChannelMessageSend(m.ChannelID, helpStr)
+		}
+	}
+}
+
+func (h *HandlersProps) Intest() func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		if i.Type == discordgo.InteractionApplicationCommand {
+
+			switch i.ApplicationCommandData().Name {
+			case "testt":
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: "testt!",
+					},
+				})
+			}
 		}
 	}
 }

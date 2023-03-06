@@ -8,6 +8,7 @@ type HandlersProps struct {
 	helpJavaHandler    func(s *discordgo.Session, m *discordgo.MessageCreate)
 	msgGreeting        func(s *discordgo.Session, m *discordgo.MessageCreate)
 	msgHelpCmd         func(s *discordgo.Session, m *discordgo.MessageCreate)
+	cmdHelper          func(s *discordgo.Session, m *discordgo.InteractionCreate)
 }
 
 type SrcProps struct {
@@ -42,4 +43,8 @@ type AiResponse struct {
 	Total_Results int           `json:"total_results"`
 	Next_Page     string        `json:"next_page"`
 	Prev_Page     string        `json:"prev_page"`
+}
+
+type OnReadyProps struct {
+	onReady func(s *discordgo.Session, r *discordgo.Ready)
 }

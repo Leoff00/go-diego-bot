@@ -33,12 +33,16 @@ func Start() {
 	BotID = u.ID
 
 	handler := handlers.HandlersProps{}
+	ord := handlers.OnReadyProps{}
+
+	goBot.AddHandlerOnce(ord.OnReady())
 
 	goBot.AddHandler(handler.MessagePingPong())
 	goBot.AddHandler(handler.HelpJava())
 	goBot.AddHandler(handler.Greeting())
 	goBot.AddHandler(handler.Img())
 	goBot.AddHandler(handler.MsgHelpCmd())
+	goBot.AddHandler(handler.Intest())
 
 	goBot.Identify.Intents = discordgo.IntentsAllWithoutPrivileged
 
