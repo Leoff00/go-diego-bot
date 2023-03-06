@@ -4,10 +4,14 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/Leoff00/go-diego-bot/config"
 	"github.com/bwmarrin/discordgo"
 )
+
+var wg sync.WaitGroup
 
 var (
 	str string
@@ -201,9 +205,9 @@ func (h *HandlersProps) ClearMsg() func(s *discordgo.Session, m *discordgo.Messa
 		}
 
 		if m.Content != "" && strings.HasPrefix(m.Content, config.BotPrefix+"clear") {
-			dt, err := strconv.Atoi(huf.ParamSeparator(m.Content))
+			limit, err := strconv.Atoi(huf.ParamSeparator(m.Content))
 
-			if dt == 0 || dt > 100 {
+			if limit == 0 || limit > 100 {
 				return
 			}
 
@@ -211,26 +215,29 @@ func (h *HandlersProps) ClearMsg() func(s *discordgo.Session, m *discordgo.Messa
 				fmt.Println("Failed to convert to int", err)
 			}
 
-			chMsg, _ := s.ChannelMessages(m.ChannelID, dt, "", "", "")
+			chMsg, _ := s.ChannelMessages(m.ChannelID, limit, "", "", "")
 			msgs := make([]string, len(chMsg))
 
 			for _, v := range chMsg {
 				msgs = append(msgs, v.ID)
 			}
 
-			for i := 0; i < len(msgs); i++ {
+			for i, _ := range msgs {
+				time.Sleep(200)
 				s.ChannelMessageDelete(m.ChannelID, msgs[i])
+				time.Sleep(200)
 			}
 
 			msgEmbed := &discordgo.MessageEmbed{
 				Title:       "| Mensagens deletadas! 🔨 ",
-				Description: fmt.Sprintf("| Total de mensagens deletadas: **%s** 📰", strconv.Itoa(dt)),
+				Description: fmt.Sprintf("| Total de mensagens deletadas: **%s** 📰", strconv.Itoa(limit)),
 				Footer: &discordgo.MessageEmbedFooter{
 					Text: "Autor do comando -> " + m.Author.Username,
 				},
 			}
 
 			s.ChannelMessageSendEmbed(m.ChannelID, msgEmbed)
+
 		}
 	}
 }
