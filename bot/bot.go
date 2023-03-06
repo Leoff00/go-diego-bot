@@ -14,7 +14,21 @@ import (
 var (
 	BotID string
 	goBot *discordgo.Session
+
+	handler = handlers.HandlersProps{}
+	sp      = handlers.SetupProps{AppId: BotID, Commands: handlers.Commands, GuildId: ""}
 )
+
+func addHandler() {
+	goBot.AddHandlerOnce(sp.OnReady())
+
+	goBot.AddHandler(handler.MessagePingPong())
+	goBot.AddHandler(handler.HelpJava())
+	goBot.AddHandler(handler.Greeting())
+	goBot.AddHandler(handler.Img())
+	goBot.AddHandler(handler.Intest())
+	goBot.AddHandler(handler.MsgCmd())
+}
 
 func Start() {
 	goBot, err := discordgo.New("Bot " + config.Token)
@@ -32,19 +46,11 @@ func Start() {
 
 	BotID = u.ID
 
-	handler := handlers.HandlersProps{}
-	ord := handlers.OnReadyProps{}
-
-	goBot.AddHandlerOnce(ord.OnReady())
-
-	goBot.AddHandler(handler.MessagePingPong())
-	goBot.AddHandler(handler.HelpJava())
-	goBot.AddHandler(handler.Greeting())
-	goBot.AddHandler(handler.Img())
-	goBot.AddHandler(handler.MsgHelpCmd())
-	goBot.AddHandler(handler.Intest())
+	addHandler()
 
 	goBot.Identify.Intents = discordgo.IntentsAllWithoutPrivileged
+
+	sp.DeleteCommands()
 
 	err = goBot.Open()
 	defer goBot.Close()
