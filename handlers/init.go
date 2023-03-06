@@ -200,30 +200,37 @@ func (h *HandlersProps) ClearMsg() func(s *discordgo.Session, m *discordgo.Messa
 			return
 		}
 
-		dt, err := strconv.Atoi(huf.ParamSeparator(m.Content))
-
-		if dt == 0 || dt > 100 {
-			return
-		}
-
-		if err != nil {
-			fmt.Println("Failed to convert to int", err)
-		}
-
-		chMsg, _ := s.ChannelMessages(m.ChannelID, dt, "", "", "")
-		msgs := make([]string, len(chMsg))
-
-		for _, v := range chMsg {
-			msgs = append(msgs, v.ID)
-		}
-
 		if m.Content != "" && strings.HasPrefix(m.Content, config.BotPrefix+"clear") {
-			for i := 0; i < len(msgs); i++ {
-				err := s.ChannelMessageDelete(m.ChannelID, msgs[i])
-				if err != nil {
-					fmt.Println("Error, cannot delete messages", err.Error())
-				}
+			dt, err := strconv.Atoi(huf.ParamSeparator(m.Content))
+
+			if dt == 0 || dt > 100 {
+				return
 			}
+
+			if err != nil {
+				fmt.Println("Failed to convert to int", err)
+			}
+
+			chMsg, _ := s.ChannelMessages(m.ChannelID, dt, "", "", "")
+			msgs := make([]string, len(chMsg))
+
+			for _, v := range chMsg {
+				msgs = append(msgs, v.ID)
+			}
+
+			for i := 0; i < len(msgs); i++ {
+				s.ChannelMessageDelete(m.ChannelID, msgs[i])
+			}
+
+			msgEmbed := &discordgo.MessageEmbed{
+				Title:       "| Mensagens deletadas! 🔨 ",
+				Description: fmt.Sprintf("| Total de mensagens deletadas: **%s** 📰", strconv.Itoa(dt)),
+				Footer: &discordgo.MessageEmbedFooter{
+					Text: "Autor do comando -> " + m.Author.Username,
+				},
+			}
+
+			s.ChannelMessageSendEmbed(m.ChannelID, msgEmbed)
 		}
 	}
 }
