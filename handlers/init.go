@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/Leoff00/go-diego-bot/config"
@@ -9,11 +10,19 @@ import (
 )
 
 var (
-	str        string
-	arr        []string
-	huf        *HandlerUtilFunctions
+	str string
+	arr []string
+	//HandlerUtilFunctions struct
+	huf *HandlerUtilFunctions
+	//Channel to response API paralell
 	responseAi = make(chan *AiResponse)
-	errC       = make(chan error)
+	//Channel to response ERROR API paralell
+	errC = make(chan error)
+
+	//Picture props
+
+	//Array with contain photo Infos
+	p *PhotoProps
 )
 
 func (h *HandlersProps) MessagePingPong() func(s *discordgo.Session, m *discordgo.MessageCreate) {
@@ -44,12 +53,23 @@ func (h *HandlersProps) Img() func(s *discordgo.Session, m *discordgo.MessageCre
 
 			select {
 			case res := <-responseAi:
-				var ogSize string
 
-				for _, p := range res.Photos {
-					ogSize = p.Src.Original
+				for _, v := range res.Photos {
+					p = v
 				}
-				_, _ = s.ChannelMessageSend(m.ChannelID, "Aqui esta o que você pediu! \n"+ogSize)
+
+				msgEmbed := &discordgo.MessageEmbed{
+					Title:       "📸 | Aqui esta sua foto!",
+					Description: p.Alt,
+					Type:        discordgo.EmbedTypeImage,
+					Color:       10,
+					Image:       &discordgo.MessageEmbedImage{URL: p.Src.Original},
+					Footer: &discordgo.MessageEmbedFooter{
+						Text: "Autor " + p.Photographer,
+					},
+				}
+
+				_, _ = s.ChannelMessageSendEmbed(m.ChannelID, msgEmbed)
 
 			case err := <-errC:
 				if err != nil {
@@ -73,7 +93,7 @@ func (h *HandlersProps) HelpJava() func(s *discordgo.Session, m *discordgo.Messa
 			"<@599980091136671754>",
 		)
 
-		if strings.Contains(m.Content, config.BotPrefix+"java") == true {
+		if strings.Contains(m.Content, config.BotPrefix+"java") {
 			_, _ = s.ChannelMessageSend(m.ChannelID, str)
 		}
 	}
@@ -90,16 +110,18 @@ func (h *HandlersProps) Greeting() func(s *discordgo.Session, m *discordgo.Messa
 	}
 }
 
-func (h *HandlersProps) Intest() func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (h *HandlersProps) MCount() func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+
+		gc, _ := s.GuildWithCounts(i.GuildID)
 		if i.Type == discordgo.InteractionApplicationCommand {
 
 			switch i.ApplicationCommandData().Name {
-			case "testt":
+			case "people":
 				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{
-						Content: "testtttt!",
+						Content: fmt.Sprintf("Temos exatamente %d pessoas no servidor ", gc.ApproximateMemberCount),
 					},
 				})
 			}
@@ -107,16 +129,54 @@ func (h *HandlersProps) Intest() func(s *discordgo.Session, i *discordgo.Interac
 	}
 }
 
-func (h *HandlersProps) MsgCmd() func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (h *HandlersProps) UAvatar() func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 
-		helpStr := fmt.Sprintf(`
-Iaee meu nome é Die**go**, bot em go feito pra te ajudar com algumas 
-utilidades no server esses são os comandos pelo qual eu respondo:
-**oi diego -> responderei você de volta!**
-**!picture [parametros] -> gerarei pra você uma imagem com o dado que você me forneceu!**
-**!java [mensagem] -> marcarei 3 pessoas que manjam de java no server para te ajudar!**
-**!ping ou !pong -> jogarei um ping pong com você :)!** `)
+		mem, err := s.GuildMember(i.GuildID, i.Member.User.ID)
+
+		if err != nil {
+			fmt.Println("Error loading the member struct", err)
+		}
+
+		msgEmbed := &discordgo.MessageEmbed{
+			Title:       "📸 | " + mem.User.Username,
+			Description: "Mas que magnifica foto!!",
+			Type:        discordgo.EmbedTypeImage,
+			Color:       10,
+			Image:       &discordgo.MessageEmbedImage{URL: mem.AvatarURL("1024")},
+		}
+
+		if i.Type == discordgo.InteractionApplicationCommand {
+
+			switch i.ApplicationCommandData().Name {
+			case "avatar":
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Embeds: []*discordgo.MessageEmbed{msgEmbed},
+					},
+				})
+			}
+		}
+	}
+}
+
+func (h *HandlersProps) HelpCmd() func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+
+		mem, err := s.GuildMember(i.GuildID, i.Member.User.ID)
+
+		if err != nil {
+			fmt.Println("Error loading the member struct", err)
+		}
+
+		msgEmbed := &discordgo.MessageEmbed{
+			Title:       HelpStr1,
+			Description: HelpStr2,
+			Type:        discordgo.EmbedTypeArticle,
+			Color:       10,
+			Footer:      &discordgo.MessageEmbedFooter{Text: "Autor: " + mem.User.Username},
+		}
 
 		if i.Type == discordgo.InteractionApplicationCommand {
 
@@ -125,9 +185,44 @@ utilidades no server esses são os comandos pelo qual eu respondo:
 				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{
-						Content: helpStr,
+						Embeds: []*discordgo.MessageEmbed{msgEmbed},
 					},
 				})
+			}
+		}
+	}
+}
+
+func (h *HandlersProps) ClearMsg() func(s *discordgo.Session, m *discordgo.MessageCreate) {
+	return func(s *discordgo.Session, m *discordgo.MessageCreate) {
+
+		if m.Author.ID == s.State.User.ID {
+			return
+		}
+
+		dt, err := strconv.Atoi(huf.ParamSeparator(m.Content))
+
+		if dt == 0 || dt > 100 {
+			return
+		}
+
+		if err != nil {
+			fmt.Println("Failed to convert to int", err)
+		}
+
+		chMsg, _ := s.ChannelMessages(m.ChannelID, dt, "", "", "")
+		msgs := make([]string, len(chMsg))
+
+		for _, v := range chMsg {
+			msgs = append(msgs, v.ID)
+		}
+
+		if m.Content != "" && strings.HasPrefix(m.Content, config.BotPrefix+"clear") {
+			for i := 0; i < len(msgs); i++ {
+				err := s.ChannelMessageDelete(m.ChannelID, msgs[i])
+				if err != nil {
+					fmt.Println("Error, cannot delete messages", err.Error())
+				}
 			}
 		}
 	}
