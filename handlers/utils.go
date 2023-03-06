@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"math/rand"
 	"net/http"
@@ -15,11 +15,7 @@ import (
 	"github.com/Leoff00/go-diego-bot/envs"
 )
 
-type HandlerUtilFunctions struct {
-	paramSeparator   func(content string) string
-	randPhrase       func(user string) string
-	pictureGenerator func(param string, resC chan *AiResponse, errC chan error) (chan *AiResponse, chan error)
-}
+type HandlerUtilFunctions struct{}
 
 func (hu *HandlerUtilFunctions) ParamSeparator(message string) string {
 	splitted := strings.Split(message, " ")
@@ -48,7 +44,7 @@ func (hu *HandlerUtilFunctions) PicGenerator(param string, resC chan *AiResponse
 	c := &http.Client{}
 
 	if regexp.MustCompile(param).MatchString(`$\s\D`) {
-		errC <- errors.New("Cannot send more than one param")
+		errC <- errors.New("cannot send more than one param")
 	}
 
 	api_url := fmt.Sprintf("https://api.pexels.com/v1/search?query=%s&page=%d&per_page=1", param, rand.Intn(100))
@@ -69,7 +65,7 @@ func (hu *HandlerUtilFunctions) PicGenerator(param string, resC chan *AiResponse
 		log.Default().Fatalln("Error during the request...", err)
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 
 	if err != nil {
 		log.Default().Fatalln("Error while reading the response, response may be nil", err)

@@ -4,6 +4,16 @@ import "github.com/bwmarrin/discordgo"
 
 type HandlersProps struct{}
 
+type SetupProps struct {
+	AppId    string
+	Commands []*discordgo.ApplicationCommand
+	GuildId  string
+}
+
+type AuthorProps struct {
+	Name, IconURL string
+}
+
 type SrcProps struct {
 	Original  string `json:"original"`
 	Large2X   string `json:"large2x"`
@@ -36,10 +46,4 @@ type AiResponse struct {
 	Total_Results int           `json:"total_results"`
 	Next_Page     string        `json:"next_page"`
 	Prev_Page     string        `json:"prev_page"`
-}
-
-type SetupProps struct {
-	AppId    string
-	Commands []*discordgo.ApplicationCommand
-	GuildId  string
 }
