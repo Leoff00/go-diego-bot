@@ -28,10 +28,4 @@ jobs:
          docker tag ${{ secrets.DOCKERHUB_USERNAME }}/diegobot ${{ secrets.DOCKERHUB_USERNAME }}/diegobot:latest
          docker push ${{ secrets.DOCKERHUB_USERNAME }}/diegobot:latest
     
-    - name: Render GitHub Action - DEPLOYING...
-      uses: Bounceapp/render-action@0.6.0
-      with:
-          email: leof0180@gmail.com
-          github-token: ${{ secrets.GH_TOKEN }}
-          render-token: ${{ secrets.RENDER_API_KEY }}
-          service-id: ${{ secrets.SERVICE_ID_RENDER }}
+
