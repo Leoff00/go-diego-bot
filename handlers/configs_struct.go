@@ -2,14 +2,7 @@ package handlers
 
 import "github.com/bwmarrin/discordgo"
 
-type HandlersProps struct {
-	msgPingPongHanlder func(s *discordgo.Session, m *discordgo.MessageCreate)
-	imgGenerator       func(s *discordgo.Session, m *discordgo.MessageCreate)
-	helpJavaHandler    func(s *discordgo.Session, m *discordgo.MessageCreate)
-	msgGreeting        func(s *discordgo.Session, m *discordgo.MessageCreate)
-	msgHelpCmd         func(s *discordgo.Session, m *discordgo.MessageCreate)
-	cmdHelper          func(s *discordgo.Session, m *discordgo.InteractionCreate)
-}
+type HandlersProps struct{}
 
 type SrcProps struct {
 	Original  string `json:"original"`
@@ -45,6 +38,8 @@ type AiResponse struct {
 	Prev_Page     string        `json:"prev_page"`
 }
 
-type OnReadyProps struct {
-	onReady func(s *discordgo.Session, r *discordgo.Ready)
+type SetupProps struct {
+	AppId    string
+	Commands []*discordgo.ApplicationCommand
+	GuildId  string
 }

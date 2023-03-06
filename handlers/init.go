@@ -90,26 +90,6 @@ func (h *HandlersProps) Greeting() func(s *discordgo.Session, m *discordgo.Messa
 	}
 }
 
-func (h *HandlersProps) MsgHelpCmd() func(s *discordgo.Session, m *discordgo.MessageCreate) {
-	return func(s *discordgo.Session, m *discordgo.MessageCreate) {
-		if m.Author.ID == s.State.User.ID {
-			return
-		}
-
-		helpStr := fmt.Sprintf(`
-Iaee %s meu nome é Die**go**, bot em go feito pra te ajudar com algumas 
-utilidades no server esses são os comandos pelo qual eu respondo:
-**oi diego -> responderei você de volta!**
-**!picture [parametros] -> gerarei pra você uma imagem com o dado que você me forneceu!**
-**!java [mensagem] -> marcarei 3 pessoas que manjam de java no server para te ajudar!**
-**!ping ou !pong -> jogarei um ping pong com você :)!** `, m.Author.Username)
-
-		if m.Content == config.BotPrefix+"help" {
-			_, _ = s.ChannelMessageSend(m.ChannelID, helpStr)
-		}
-	}
-}
-
 func (h *HandlersProps) Intest() func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		if i.Type == discordgo.InteractionApplicationCommand {
@@ -119,7 +99,33 @@ func (h *HandlersProps) Intest() func(s *discordgo.Session, i *discordgo.Interac
 				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{
-						Content: "testt!",
+						Content: "testtttt!",
+					},
+				})
+			}
+		}
+	}
+}
+
+func (h *HandlersProps) MsgCmd() func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+
+		helpStr := fmt.Sprintf(`
+Iaee meu nome é Die**go**, bot em go feito pra te ajudar com algumas 
+utilidades no server esses são os comandos pelo qual eu respondo:
+**oi diego -> responderei você de volta!**
+**!picture [parametros] -> gerarei pra você uma imagem com o dado que você me forneceu!**
+**!java [mensagem] -> marcarei 3 pessoas que manjam de java no server para te ajudar!**
+**!ping ou !pong -> jogarei um ping pong com você :)!** `)
+
+		if i.Type == discordgo.InteractionApplicationCommand {
+
+			switch i.ApplicationCommandData().Name {
+			case "help":
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: helpStr,
 					},
 				})
 			}
