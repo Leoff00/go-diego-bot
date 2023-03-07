@@ -4,14 +4,11 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/Leoff00/go-diego-bot/config"
 	"github.com/bwmarrin/discordgo"
 )
-
-var wg sync.WaitGroup
 
 var (
 	str string
@@ -23,9 +20,7 @@ var (
 	//Channel to response ERROR API paralell
 	errC = make(chan error)
 
-	//Picture props
-
-	//Array with contain photo Infos
+	//Array that contains photo Infos
 	p *PhotoProps
 )
 
@@ -207,7 +202,7 @@ func (h *HandlersProps) ClearMsg() func(s *discordgo.Session, m *discordgo.Messa
 		if m.Content != "" && strings.HasPrefix(m.Content, config.BotPrefix+"clear") {
 			limit, err := strconv.Atoi(huf.ParamSeparator(m.Content))
 
-			if limit == 0 || limit > 100 {
+			if limit <= 0 || limit > 100 {
 				return
 			}
 
