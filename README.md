@@ -20,6 +20,9 @@
 
 ## Key Features
 
+* Slash commands
+- The bot supports both slash commands and prefix commands  ("!"). To show slash commands, type /help.
+
 * Command prefix
   - The bot responses with a command prefix, that's a "!".
 * Ping-pong
@@ -30,6 +33,8 @@
   - The bot will greeting you if you send "!Oi diego" to him.
 * Image generator
   - Diego bot responses with an image if you send "!picture (your substantive).
+* Clear messages
+  - Diego will clear the chat with the number of messages that you provide (MAX: 100). 
 
 ## How To Use
 
