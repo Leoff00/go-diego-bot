@@ -50,6 +50,7 @@ func Start() {
 	addHandler(goBot)
 
 	goBot.Identify.Intents = discordgo.IntentsAllWithoutPrivileged
+	goBot.Identify.Intents = discordgo.PermissionManageMessages
 
 	sp.DeleteCommands()
 
@@ -67,4 +68,5 @@ func Start() {
 	signal.Notify(stsignal, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 
 	<-stsignal
+
 }

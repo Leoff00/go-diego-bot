@@ -8,11 +8,6 @@ import (
 )
 
 func main() {
-	// defer func() {
-	// 	if r := recover(); r != nil {
-	// 		fmt.Println("Panic recovered", r)
-	// 	}
-	// }()
 
 	err := config.ReadConfig()
 

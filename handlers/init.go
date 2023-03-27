@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -24,55 +25,75 @@ var (
 	p *PhotoProps
 )
 
-func (h *HandlersProps) MessagePingPong() func(s *discordgo.Session, m *discordgo.MessageCreate) {
-	return func(s *discordgo.Session, m *discordgo.MessageCreate) {
-		if m.Author.ID == s.State.User.ID {
-			return
-		}
+func (h *HandlersProps) MessagePingPong() func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 
-		if m.Content == config.BotPrefix+"ping" {
-			_, _ = s.ChannelMessageSend(m.ChannelID, "pong")
-		}
-		if m.Content == config.BotPrefix+"pong" {
-			_, _ = s.ChannelMessageSend(m.ChannelID, "ping")
+		if i.Type == discordgo.InteractionApplicationCommand {
+			switch i.ApplicationCommandData().Name {
+			case "ping":
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Flags:   discordgo.MessageFlagsEphemeral,
+						Content: "pong",
+					},
+				})
+			case "pong":
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Flags:   discordgo.MessageFlagsEphemeral,
+						Content: "ping",
+					},
+				})
+			}
 		}
 	}
 }
 
-func (h *HandlersProps) Img() func(s *discordgo.Session, m *discordgo.MessageCreate) {
-	return func(s *discordgo.Session, m *discordgo.MessageCreate) {
-		if m.Author.ID == s.State.User.ID {
-			return
-		}
+func (h *HandlersProps) Img() func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 
-		if m.Content != "" && strings.HasPrefix(m.Content, config.BotPrefix+"picture") {
-			data := huf.ParamSeparator(m.Content)
+		if i.Type == discordgo.InteractionApplicationCommand {
 
-			go huf.PicGenerator(data, responseAi, errC)
+			switch i.ApplicationCommandData().Name {
+			case "img":
+				param := i.ApplicationCommandData().Options[0].StringValue()
 
-			select {
-			case res := <-responseAi:
+				if param != "" {
 
-				for _, v := range res.Photos {
-					p = v
-				}
+					go huf.PicGenerator(param, responseAi, errC)
 
-				msgEmbed := &discordgo.MessageEmbed{
-					Title:       "📸 | Aqui esta sua foto!",
-					Description: p.Alt,
-					Type:        discordgo.EmbedTypeImage,
-					Color:       10,
-					Image:       &discordgo.MessageEmbedImage{URL: p.Src.Original},
-					Footer: &discordgo.MessageEmbedFooter{
-						Text: "Autor " + p.Photographer,
-					},
-				}
+					select {
+					case res := <-responseAi:
 
-				_, _ = s.ChannelMessageSendEmbed(m.ChannelID, msgEmbed)
+						for _, v := range res.Photos {
+							p = v
+						}
 
-			case err := <-errC:
-				if err != nil {
-					_, _ = s.ChannelMessageSend(m.ChannelID, err.Error())
+						msgEmbed := &discordgo.MessageEmbed{
+							Title:       "📸 | Aqui esta sua foto!",
+							Description: p.Alt,
+							Type:        discordgo.EmbedTypeImage,
+							Color:       10,
+							Image:       &discordgo.MessageEmbedImage{URL: p.Src.Original},
+							Footer: &discordgo.MessageEmbedFooter{
+								Text: "Autor " + p.Photographer,
+							},
+						}
+						s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+							Type: discordgo.InteractionResponseChannelMessageWithSource,
+							Data: &discordgo.InteractionResponseData{
+								Flags:  discordgo.MessageFlagsEphemeral,
+								Embeds: []*discordgo.MessageEmbed{msgEmbed},
+							},
+						})
+
+					case err := <-errC:
+						if err != nil {
+							_, _ = s.ChannelMessageSend(i.Message.ChannelID, err.Error())
+						}
+					}
 				}
 			}
 		}
@@ -114,12 +135,12 @@ func (h *HandlersProps) MCount() func(s *discordgo.Session, i *discordgo.Interac
 
 		gc, _ := s.GuildWithCounts(i.GuildID)
 		if i.Type == discordgo.InteractionApplicationCommand {
-
 			switch i.ApplicationCommandData().Name {
 			case "people":
 				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{
+						Flags:   discordgo.MessageFlagsEphemeral,
 						Content: fmt.Sprintf("Temos exatamente %d pessoas no servidor ", gc.ApproximateMemberCount),
 					},
 				})
@@ -131,30 +152,36 @@ func (h *HandlersProps) MCount() func(s *discordgo.Session, i *discordgo.Interac
 func (h *HandlersProps) UAvatar() func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 
-		mem, err := s.GuildMember(i.GuildID, i.Member.User.ID)
-
-		if err != nil {
-			fmt.Println("Error loading the member struct", err)
-		}
-
-		msgEmbed := &discordgo.MessageEmbed{
-			Title:       "📸 | " + mem.User.Username,
-			Description: "Mas que magnifica foto!!",
-			Type:        discordgo.EmbedTypeImage,
-			Color:       10,
-			Image:       &discordgo.MessageEmbedImage{URL: mem.AvatarURL("1024")},
-		}
-
 		if i.Type == discordgo.InteractionApplicationCommand {
-
 			switch i.ApplicationCommandData().Name {
 			case "avatar":
-				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-					Type: discordgo.InteractionResponseChannelMessageWithSource,
-					Data: &discordgo.InteractionResponseData{
-						Embeds: []*discordgo.MessageEmbed{msgEmbed},
-					},
-				})
+				regex := regexp.MustCompile(`\d`)
+				userId := strings.Join(regex.FindAllString(i.ApplicationCommandData().Options[0].StringValue(), -1), "")
+
+				if userId != "" {
+					mem, err := s.GuildMember(i.GuildID, userId)
+
+					if err != nil {
+						fmt.Println("Error loading the member struct", err)
+					}
+
+					msgEmbed := &discordgo.MessageEmbed{
+						Title:       "📸 | " + mem.User.Username,
+						Description: "Mas que magnifica foto!!",
+						Type:        discordgo.EmbedTypeImage,
+						Color:       10,
+						Image:       &discordgo.MessageEmbedImage{URL: mem.AvatarURL("1024")},
+					}
+
+					s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+						Type: discordgo.InteractionResponseChannelMessageWithSource,
+						Data: &discordgo.InteractionResponseData{
+							Flags:  discordgo.MessageFlagsEphemeral,
+							Embeds: []*discordgo.MessageEmbed{msgEmbed},
+						},
+					})
+
+				}
 			}
 		}
 	}
@@ -162,28 +189,26 @@ func (h *HandlersProps) UAvatar() func(s *discordgo.Session, i *discordgo.Intera
 
 func (h *HandlersProps) HelpCmd() func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-
-		mem, err := s.GuildMember(i.GuildID, i.Member.User.ID)
-
-		if err != nil {
-			fmt.Println("Error loading the member struct", err)
-		}
-
-		msgEmbed := &discordgo.MessageEmbed{
-			Title:       HelpStr1,
-			Description: HelpStr2,
-			Type:        discordgo.EmbedTypeArticle,
-			Color:       10,
-			Footer:      &discordgo.MessageEmbedFooter{Text: "Autor: " + mem.User.Username},
-		}
-
 		if i.Type == discordgo.InteractionApplicationCommand {
-
 			switch i.ApplicationCommandData().Name {
 			case "help":
+				mem, err := s.GuildMember(i.GuildID, i.Member.User.ID)
+
+				if err != nil {
+					fmt.Println("Error loading the member struct", err)
+				}
+
+				msgEmbed := &discordgo.MessageEmbed{
+					Title:       HelpStr1,
+					Description: HelpStr2,
+					Type:        discordgo.EmbedTypeArticle,
+					Color:       10,
+					Footer:      &discordgo.MessageEmbedFooter{Text: "Autor: " + mem.User.Username},
+				}
 				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{
+						Flags:  discordgo.MessageFlagsEphemeral,
 						Embeds: []*discordgo.MessageEmbed{msgEmbed},
 					},
 				})
@@ -192,47 +217,75 @@ func (h *HandlersProps) HelpCmd() func(s *discordgo.Session, i *discordgo.Intera
 	}
 }
 
-func (h *HandlersProps) ClearMsg() func(s *discordgo.Session, m *discordgo.MessageCreate) {
-	return func(s *discordgo.Session, m *discordgo.MessageCreate) {
+func (h *HandlersProps) ClearMsg() func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		if i.Type == discordgo.InteractionApplicationCommand {
+			switch i.ApplicationCommandData().Name {
+			case "clear":
+				limit, err := strconv.Atoi(i.ApplicationCommandData().Options[0].StringValue())
 
-		if m.Author.ID == s.State.User.ID {
-			return
-		}
+				if err != nil {
+					fmt.Println("Cannot convert string to integer", err)
+				}
 
-		if m.Content != "" && strings.HasPrefix(m.Content, config.BotPrefix+"clear") {
-			limit, err := strconv.Atoi(huf.ParamSeparator(m.Content))
+				mem, err := s.GuildMember(i.GuildID, i.Member.User.ID)
 
-			if limit <= 0 || limit > 100 {
-				return
+				if err != nil {
+					fmt.Println("Error loading the member struct", err)
+				}
+
+				if limit <= 0 || limit > 100 {
+					return
+				}
+
+				if mem.Roles[0] == "920531812760051722" || mem.Roles[0] == "610527002830569482" || mem.Roles[0] == "920532087881203713" {
+
+					chMsg, _ := s.ChannelMessages(i.ChannelID, limit, "", "", "")
+
+					for _, v := range chMsg {
+						msgs := make([]string, 0)
+						msgs = append(msgs, v.ID)
+						time.Sleep(500)
+						err := s.ChannelMessagesBulkDelete(i.ChannelID, msgs)
+
+						if err != nil {
+							fmt.Println("Error during deleting msgs", err)
+						}
+
+					}
+
+					msgEmbed := &discordgo.MessageEmbed{
+						Title:       "| Mensagens deletadas! 🔨 ",
+						Description: fmt.Sprintf("| Total de mensagens deletadas: **%s** 📰", strconv.Itoa(limit)),
+						Footer: &discordgo.MessageEmbedFooter{
+							Text: "Autor do comando -> " + i.Member.User.Username,
+						},
+					}
+					s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+						Type: discordgo.InteractionResponseChannelMessageWithSource,
+						Data: &discordgo.InteractionResponseData{
+							Flags:  discordgo.MessageFlagsEphemeral,
+							Embeds: []*discordgo.MessageEmbed{msgEmbed},
+						},
+					})
+
+				} else {
+					msgEmbed := &discordgo.MessageEmbed{
+						Title:       "| Você não tem permissão pra usar esse comando! ",
+						Description: "| As mensagens não foram deletadas.",
+						Footer: &discordgo.MessageEmbedFooter{
+							Text: "Autor do comando -> " + i.Member.User.Username,
+						},
+					}
+					s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+						Type: discordgo.InteractionResponseChannelMessageWithSource,
+						Data: &discordgo.InteractionResponseData{
+							Flags:  discordgo.MessageFlagsEphemeral,
+							Embeds: []*discordgo.MessageEmbed{msgEmbed},
+						},
+					})
+				}
 			}
-
-			if err != nil {
-				fmt.Println("Failed to convert to int", err)
-			}
-
-			chMsg, _ := s.ChannelMessages(m.ChannelID, limit, "", "", "")
-			msgs := make([]string, len(chMsg))
-
-			for _, v := range chMsg {
-				msgs = append(msgs, v.ID)
-			}
-
-			for i, _ := range msgs {
-				time.Sleep(200)
-				s.ChannelMessageDelete(m.ChannelID, msgs[i])
-				time.Sleep(200)
-			}
-
-			msgEmbed := &discordgo.MessageEmbed{
-				Title:       "| Mensagens deletadas! 🔨 ",
-				Description: fmt.Sprintf("| Total de mensagens deletadas: **%s** 📰", strconv.Itoa(limit)),
-				Footer: &discordgo.MessageEmbedFooter{
-					Text: "Autor do comando -> " + m.Author.Username,
-				},
-			}
-
-			s.ChannelMessageSendEmbed(m.ChannelID, msgEmbed)
-
 		}
 	}
 }
