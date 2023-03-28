@@ -43,7 +43,7 @@ func (hu *HandlerUtilFunctions) PicGenerator(param string, resC chan *AiResponse
 
 	c := &http.Client{}
 
-	if !regexp.MustCompile(param).MatchString(`^[\p{L}]+$`) {
+	if regexp.MustCompile(param).MatchString(`\W\d\s`) {
 		errC <- errors.New("cannot send more than one param")
 	}
 

@@ -55,15 +55,12 @@ func (h *HandlersProps) Img() func(s *discordgo.Session, i *discordgo.Interactio
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 
 		if i.Type == discordgo.InteractionApplicationCommand {
-
 			switch i.ApplicationCommandData().Name {
 			case "img":
 				param := i.ApplicationCommandData().Options[0].StringValue()
 
 				if param != "" {
-
 					go huf.PicGenerator(param, responseAi, errC)
-
 					select {
 					case res := <-responseAi:
 
@@ -91,7 +88,18 @@ func (h *HandlersProps) Img() func(s *discordgo.Session, i *discordgo.Interactio
 
 					case err := <-errC:
 						if err != nil {
-							_, _ = s.ChannelMessageSend(i.Message.ChannelID, err.Error())
+							msgEmbed := &discordgo.MessageEmbed{
+								Title: "A foto nao foi gerada corretamente... ",
+								Type:  discordgo.EmbedTypeImage,
+								Color: 10,
+							}
+							s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+								Type: discordgo.InteractionResponseChannelMessageWithSource,
+								Data: &discordgo.InteractionResponseData{
+									Flags:  discordgo.MessageFlagsEphemeral,
+									Embeds: []*discordgo.MessageEmbed{msgEmbed},
+								},
+							})
 						}
 					}
 				}
