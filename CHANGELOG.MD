@@ -14,6 +14,8 @@ current API that Diego requests for images has inconsistency.
 
 ## Release 
 
+[v1.0.1 - 2023-03-28](https://github.com/Leoff00/go-diego-bot/releases/tag/v1.0.1)
+
 ## What’s New?
 
 Now Diego bot supports native all previous commands with the slash, with registry descriptions and stable api that
