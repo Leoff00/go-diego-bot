@@ -18,13 +18,13 @@ func addCmds(commands []*discordgo.ApplicationCommand, s *discordgo.Session) {
 }
 
 func (sp *SetupProps) OnReady() func(s *discordgo.Session, r *discordgo.Ready) {
-	return func(s *discordgo.Session, r *discordgo.Ready) {
+	return func(s *discordgo.Session, _ *discordgo.Ready) {
 		addCmds(sp.Commands, s)
 	}
 }
 
 func (sp *SetupProps) DeleteCommands() func(s *discordgo.Session, r *discordgo.Ready) {
-	return func(s *discordgo.Session, r *discordgo.Ready) {
+	return func(s *discordgo.Session, _ *discordgo.Ready) {
 
 		commands, err := s.ApplicationCommands(sp.AppId, "")
 		if err != nil {
