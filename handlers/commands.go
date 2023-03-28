@@ -8,7 +8,7 @@ var (
 	Commands = []*discordgo.ApplicationCommand{
 		{
 			Name:        "help_bombas",
-			Description: "selecione 3 pessoas para te ajudar",
+			Description: "irei sugerir pessoas nos cargos para te ajudar (opções suportadas: java/js)",
 			Options: []*discordgo.ApplicationCommandOption{
 				{
 					Type:        discordgo.ApplicationCommandOptionString,
@@ -80,12 +80,12 @@ var (
 	HelpStr1 = `Iaee meu nome é Die**go**, bot em go feito pra te ajudar com algumas
 utilidades no server esses são os comandos pelo qual eu respondo: `
 	HelpStr2 = `
-	**oi diego -> responderei você de volta!**
+	**/oi_diego -> responderei você de volta!**
 	**/img [parametros] -> gerarei pra você uma imagem com o dado que você me forneceu!**
-	**!java [mensagem] -> marcarei 3 pessoas que manjam de java no server para te ajudar!**
+	**/help_bombas [linguagem] use este comando quando tiver uma duvida em determinada linguagem!**
 	**/ping ou /pong -> jogarei um ping pong com você :)!**
-	**!clear [quantidade] (limite de 100) para excluir as mensagens do chat.** 
+	**/clear [limite] (limite de 100) para excluir as mensagens do chat (usado apenas por administradores).** 
 	**/people para mostrar quantas pessoas temos no servidor!** 
-	**/avatar para mostrar sua foto, contendo tambem a url dela.** 
+	**/avatar para mostrar a foto de alguem no servidor.** 
 	`
 )

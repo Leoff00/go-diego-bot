@@ -115,10 +115,11 @@ func (h *HandlersProps) HelpJava() func(s *discordgo.Session, m *discordgo.Inter
 				if strings.Contains(i.ApplicationCommandData().Options[0].StringValue(), "js") {
 
 					str = fmt.Sprintf(
-						"Opa %s, uma bomba em %s 💣? Esses caras de %s podem te ajudar 👇",
+						"Opa %s, uma bomba em %s 💣? Esses caras de %s e %s podem te ajudar 👇",
 						i.Member.User.Username,
 						i.ApplicationCommandData().Options[0].StringValue(),
-						"<@&610527002830569482>",
+						"<@&1021801776116142110>",
+						"<@&1021799560026259496>",
 					)
 
 					s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -136,7 +137,7 @@ func (h *HandlersProps) HelpJava() func(s *discordgo.Session, m *discordgo.Inter
 						"Opa %s, uma bomba em %s 💣? Esses caras de %s podem te ajudar 👇",
 						i.Member.User.Username,
 						i.ApplicationCommandData().Options[0].StringValue(),
-						"<@&954037282401288202>",
+						"<@&1021801356178239510>",
 					)
 
 					s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
