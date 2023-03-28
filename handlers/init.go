@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Leoff00/go-diego-bot/config"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -108,32 +107,66 @@ func (h *HandlersProps) Img() func(s *discordgo.Session, i *discordgo.Interactio
 	}
 }
 
-func (h *HandlersProps) HelpJava() func(s *discordgo.Session, m *discordgo.MessageCreate) {
-	return func(s *discordgo.Session, m *discordgo.MessageCreate) {
-		if m.Author.ID == s.State.User.ID {
-			return
-		}
-		str = fmt.Sprintf(
-			"Opa %s, uma bomba JS 💣? Esses caras podem te ajudar 👇 \n %s \n %s \n %s",
-			m.Author.Mention(),
-			"<@209655533500628992>",
-			"<@847935543018782772>",
-			"<@599980091136671754>",
-		)
+func (h *HandlersProps) HelpJava() func(s *discordgo.Session, m *discordgo.InteractionCreate) {
+	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		if i.Type == discordgo.InteractionApplicationCommand {
+			switch i.ApplicationCommandData().Name {
+			case "help_bombas":
+				if strings.Contains(i.ApplicationCommandData().Options[0].StringValue(), "js") {
 
-		if strings.Contains(m.Content, config.BotPrefix+"java") {
-			_, _ = s.ChannelMessageSend(m.ChannelID, str)
+					str = fmt.Sprintf(
+						"Opa %s, uma bomba em %s 💣? Esses caras de %s podem te ajudar 👇",
+						i.Member.User.Username,
+						i.ApplicationCommandData().Options[0].StringValue(),
+						"<@&610527002830569482>",
+					)
+
+					s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+						Type: discordgo.InteractionResponseChannelMessageWithSource,
+						Data: &discordgo.InteractionResponseData{
+							Flags:   discordgo.MessageFlagsEphemeral,
+							Content: str,
+						},
+					})
+				}
+
+				if strings.Contains(i.ApplicationCommandData().Options[0].StringValue(), "java") {
+
+					str = fmt.Sprintf(
+						"Opa %s, uma bomba em %s 💣? Esses caras de %s podem te ajudar 👇",
+						i.Member.User.Username,
+						i.ApplicationCommandData().Options[0].StringValue(),
+						"<@&954037282401288202>",
+					)
+
+					s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+						Type: discordgo.InteractionResponseChannelMessageWithSource,
+						Data: &discordgo.InteractionResponseData{
+							Flags:   discordgo.MessageFlagsEphemeral,
+							Content: str,
+						},
+					})
+				}
+
+			}
 		}
 	}
 }
 
-func (h *HandlersProps) Greeting() func(s *discordgo.Session, m *discordgo.MessageCreate) {
-	return func(s *discordgo.Session, m *discordgo.MessageCreate) {
-		if m.Author.ID == s.State.User.ID {
-			return
-		}
-		if m.Content == "oi diego" {
-			_, _ = s.ChannelMessageSend(m.ChannelID, huf.RandPh(m.Author.Username))
+func (h *HandlersProps) Greeting() func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+
+		if i.Type == discordgo.InteractionApplicationCommand {
+			switch i.ApplicationCommandData().Name {
+			case "oi_diego":
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Flags:   discordgo.MessageFlagsEphemeral,
+						Content: huf.RandPh(i.Member.User.Username),
+					},
+				})
+			}
 		}
 	}
 }
@@ -254,6 +287,7 @@ func (h *HandlersProps) ClearMsg() func(s *discordgo.Session, i *discordgo.Inter
 						msgs := make([]string, 0)
 						msgs = append(msgs, v.ID)
 						time.Sleep(500)
+
 						err := s.ChannelMessagesBulkDelete(i.ChannelID, msgs)
 
 						if err != nil {

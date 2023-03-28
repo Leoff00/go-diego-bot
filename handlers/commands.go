@@ -7,6 +7,21 @@ import (
 var (
 	Commands = []*discordgo.ApplicationCommand{
 		{
+			Name:        "help_bombas",
+			Description: "selecione 3 pessoas para te ajudar",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "language",
+					Description: "Qual a linguagem?",
+				},
+			},
+		},
+		{
+			Name:        "oi_diego",
+			Description: "Saudações!!",
+		},
+		{
 			Name:        "clear",
 			Description: "exclua até 100 mensagens",
 			Options: []*discordgo.ApplicationCommandOption{
