@@ -12,3 +12,10 @@ followed by a !
 Yet need to find an good API to generate images with more efficience, the
 current API that Diego requests for images has inconsistency.
 
+## Release 
+
+## What’s New?
+
+Now Diego bot supports native all previous commands with the slash, with registry descriptions and stable api that
+can find images without bugs, can delete messages clearly and show avatar all with registry commands **the bot didn't respond anymore with command prefix**.
+
