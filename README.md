@@ -6,7 +6,7 @@
   <br>
 </h1>
 
-<h4 align="center">Bot features made with golang for <a href="https://www.discord.com" target="_blank">Discord</a> (is unfinished and close project yet).</h4>
+<h4 align="center">Bot features made with golang for <a href="https://www.discord.com" target="_blank">Discord</a></h4>
 
 <p align="center">
   <a href="#key-features">Key Features</a> •
