@@ -1,13 +1,19 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
+	"log"
+	"math/rand"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/Leoff00/go-diego-bot/config"
 	"github.com/bwmarrin/discordgo"
+	customsearch "google.golang.org/api/customsearch/v1"
+	"google.golang.org/api/option"
 )
 
 var (
@@ -50,57 +56,67 @@ func (h *HandlersProps) MessagePingPong() func(s *discordgo.Session, i *discordg
 	}
 }
 
+func createCustomSearchClient(apiKey string) (*customsearch.Service, error) {
+	ctx := context.Background()
+	client, err := customsearch.NewService(ctx, option.WithAPIKey(apiKey))
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
+func getRandomImage(items []*customsearch.Result) (*customsearch.Result, error) {
+	rand.Seed(time.Now().UnixNano())
+	if len(items) == 0 {
+		return nil, fmt.Errorf("Nenhum item encontrado")
+	}
+	return items[rand.Intn(len(items))], nil
+}
+
 func (h *HandlersProps) Img() func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	return func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-
 		if i.Type == discordgo.InteractionApplicationCommand {
 			switch i.ApplicationCommandData().Name {
 			case "img":
 				param := i.ApplicationCommandData().Options[0].StringValue()
 
 				if param != "" {
-					go huf.PicGenerator(param, responseAi, errC)
-					select {
-					case res := <-responseAi:
-
-						for _, v := range res.Photos {
-							p = v
-						}
-
-						msgEmbed := &discordgo.MessageEmbed{
-							Title:       "📸 | Aqui esta sua foto!",
-							Description: p.Alt,
-							Type:        discordgo.EmbedTypeImage,
-							Color:       10,
-							Image:       &discordgo.MessageEmbedImage{URL: p.Src.Original},
-							Footer: &discordgo.MessageEmbedFooter{
-								Text: "Autor " + p.Photographer,
-							},
-						}
-						s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-							Type: discordgo.InteractionResponseChannelMessageWithSource,
-							Data: &discordgo.InteractionResponseData{
-								Flags:  discordgo.MessageFlagsEphemeral,
-								Embeds: []*discordgo.MessageEmbed{msgEmbed},
-							},
-						})
-
-					case err := <-errC:
-						if err != nil {
-							msgEmbed := &discordgo.MessageEmbed{
-								Title: "A foto nao foi gerada corretamente... ",
-								Type:  discordgo.EmbedTypeImage,
-								Color: 10,
-							}
-							s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-								Type: discordgo.InteractionResponseChannelMessageWithSource,
-								Data: &discordgo.InteractionResponseData{
-									Flags:  discordgo.MessageFlagsEphemeral,
-									Embeds: []*discordgo.MessageEmbed{msgEmbed},
-								},
-							})
-						}
+					client, err := createCustomSearchClient(config.Google_Key)
+					if err != nil {
+						log.Printf("Erro ao criar o cliente Custom Search: %v\n", err)
+						return
 					}
+
+					search := client.Cse.List().Cx(config.SearchEngineId).Q(param).SearchType("image")
+					resp, err := search.Do()
+
+					if err != nil {
+						log.Printf("Erro ao realizar a pesquisa: %v\n", err)
+						return
+					}
+
+					randomImage, err := getRandomImage(resp.Items)
+					if err != nil {
+						log.Printf("Erro ao escolher uma imagem aleatória: %v\n", err)
+						return
+					}
+
+					imgURL := randomImage.Link
+
+					msgEmbed := &discordgo.MessageEmbed{
+						Title:       "📸 | Aqui está sua foto!",
+						Description: param,
+						Type:        discordgo.EmbedTypeImage,
+						Color:       10,
+						Image:       &discordgo.MessageEmbedImage{URL: imgURL},
+					}
+					s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+						Type: discordgo.InteractionResponseChannelMessageWithSource,
+						Data: &discordgo.InteractionResponseData{
+							Flags:  discordgo.MessageFlagsEphemeral,
+							Embeds: []*discordgo.MessageEmbed{msgEmbed},
+						},
+					})
 				}
 			}
 		}
